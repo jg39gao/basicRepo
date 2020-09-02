@@ -1,3 +1,11 @@
+# #######################
+# Author: Kyle Gao 
+# Sept 2020
+# @Sheffield, UK 
+
+# #######################
+
+
 try:
     os.makedirs( os.path.join(os.getcwd(), 'folderName') )
 except OSError:
