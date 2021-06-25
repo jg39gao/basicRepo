@@ -1403,6 +1403,71 @@ for ax in axs.flat:
 fig.tight_layout()
 fig.savefig('../../deliverable/Figure/training_loss.pdf', format='pdf')
 
+
+
+
+subplot 2021-06 
+
+
+rsl={}
+metrix= np.matrix([
+         ['dy_active_rate','both_active_rate'],
+        ['dy_duration','both_duration'],
+         ['dy_tax_revenue_acc','both_amt']])
+# ['dy_active_rate', 'dy_duration','dy_tax_revenue_acc',
+#                            'both_active_rate','both_duration', 'both_amt']
+
+fig, ax = plt.subplots(metrix.shape[0],metrix.shape[1],  sharey='row',figsize=(8,9) 
+                      )
+name= 'group11_dylite_&_hgame_virtualAB'
+
+for k,metric in enumerate(metrix.flat):
+    ht={} #  hypothesis test datum.
+    # metric='dy_tax_revenue_acc'
+    
+    for i in ds.tag.unique():
+        x= ds[ds.tag==i]
+
+        ht['date']=x.date.tolist()
+        ht[i]=x[metric].tolist()
+        ax.flat[k].plot(x.date,x[metric],label=i)
+
+    ht_df= pd.DataFrame.from_dict(ht)
+    ax.flat[k].axvline(x= 30, linestyle='--',color= 'r', linewidth=1  ) 
+    if k==0: ax.flat[k].legend(loc = 'best')
+    ax.flat[k].set_title(metric)
+    tck= ht_df.index%7==0
+    ax.flat[k].set_xticks(ht_df.index[tck], minor=False)
+    ax.flat[k].set_xticklabels(ht_df.date[tck], rotation=45, fontdict=None, minor=False)
+
+
+    ### save the hypothesis test results. 
+    v= ht_df.loc[:29,]
+    # stats.ttest_rel(v['control'],v['group_test'])
+    p, t_sta, t_pvalue= two_sample_test(v['group_test'],v['control'],0)
+    v= ht_df.loc[30:,]
+    obs_p, obs_t_sta, obs_t_pvalue= two_sample_test(v['group_test'],v['control'],0)
+
+    rsl[metric]={'before_var_p':p, 'before_t_sta':t_sta, 'before_t_pvalue':t_pvalue,
+             'obs_var_p':obs_p, 'obs_t_sta':obs_t_sta, 'obs_t_pvalue':obs_t_pvalue }
+
+
+    
+for i,axk in enumerate(ax.flat):
+    axk.set(xlabel='date', ylabel=('','','duration/s','','amout/分','')[i])
+#     axk.label_outer()   
+fig.suptitle(name, fontsize=16)
+fig.tight_layout(rect=[0, 0.03, 1, 0.95]) #tight_layout() only considers ticklabels, axis labels, and titles. Thus, other artists may be clipped and also may overlap.
+
+fig.savefig(name+'.pdf', format='pdf')
+
+
+rsl_df= pd.DataFrame.from_dict(rsl).T
+rsl_df
+
+
+
+
 ==================================
 notes @R 
 ==================================
