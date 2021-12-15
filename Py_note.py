@@ -1293,13 +1293,25 @@ plt.show()
 
 
 # plot a histgram 
+'''
+when plot a histgram using statistical data ( two fields like: claim_amount, cnt ), 
+take a pre-processing :
+    ds= np.repeat(df.claim_amount, df.cnt) 
+'''
 
-plt.hist(claims['Claim_Amount'],bins = 200)
-plt.title('Histogram of non-zero Claim_Amount')
-plt.xlim([0,3000])
-plt.xlabel('claim amount(truncate 3000+)')
+ds_1= ds#[ds>80]
+name='distribution of points claimed'
+ticks= list(range(0,max(ds_1),5000))
+plt.hist(ds_1,bins = 200,log=True)
+plt.title(name)
+# plt.xlim([0,3000])
+plt.xticks( ticks #, labels= [ str(i/10000)+'w' for i in ticks] 
+           ,fontsize=8
+          )
+plt.xlabel('points claimed')
 plt.ylabel('frequency')
 plt.show()
+# plt.savefig(name+'.pdf', format='pdf') 
 plt.savefig(os.path.join(savedir,'Q2_1_claim_amt.pdf'), format='pdf')
 plt.close()
 
