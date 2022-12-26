@@ -911,6 +911,8 @@ no_votes= 43_132_495
 percentage= yes_votes/ (yes_votes+ no_votes)
 '{:^19.2f} Yes votes {:2.2}'.format(yes_votes, percentage)
 
+
+formating 
 # =============================================================================
 # 'd'	Signed integer decimal.	
 # 'i'	Signed integer decimal.	
