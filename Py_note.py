@@ -662,11 +662,7 @@ np.linspace(start , stop , num )
 #Returns `num` evenly spaced samples, calculated over the interval [`start`, `stop`].
 
 
-# indexing , selecting # 
-# List can't take boolean index. so have to use np.array or pd.Series
-l=list(range(1950, 2011))
-np.array(l)[np.array(l)>2000]
-pd.Series(l)[pd.Series(l)>2000]
+
 
 
 ## 
@@ -1163,10 +1159,18 @@ newseries = df.iloc[ (df['BBB'] > 25).values & (df['CCC'] >= -40).values, :3]  #
 newseries
 
 
-filter a list by a boolean list.  list don't support boolean selecting unless cast it to np.array. 
 
+
+#filter a list by a boolean list.  list don't support boolean selecting unless cast it to np.array. 
 # selecting the non-digital columns: 
 np.array(df.columns)[np.array([not isinstance(x, numbers.Number)  for x in df.loc[0]])]
+
+# indexing , selecting # 
+# List can't take boolean index. so have to use np.array or pd.Series
+l=list(range(1950, 2011))
+np.array(l)[np.array(l)>2000]
+pd.Series(l)[pd.Series(l)>2000]
+
 
 
 
