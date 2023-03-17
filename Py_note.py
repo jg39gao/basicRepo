@@ -1163,6 +1163,12 @@ newseries = df.iloc[ (df['BBB'] > 25).values & (df['CCC'] >= -40).values, :3]  #
 newseries
 
 
+filter a list by a boolean list.  list don't support boolean selecting unless cast it to np.array. 
+
+# selecting the non-digital columns: 
+np.array(df.columns)[np.array([not isinstance(x, numbers.Number)  for x in df.loc[0]])]
+
+
 
 
 Y=list(range(5,10))
