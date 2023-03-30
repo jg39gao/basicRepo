@@ -660,6 +660,11 @@ h  NaN  NaN  2.0  30.0
 i  NaN  NaN  3.0  40.0
 
 
+x0= df0.groupby('app').size()
+x_total = pd.concat([ df,
+                    x0.rename('df0')]) ##  x0是一个是series类型， concat上之后没有列名，需要用.rename()重命名）.
+
+
 # rep * , concatenate + 
 states=['NY']*5+['FL']*4+[0]*2
 # get a result ['NY', 'NY', 'NY', 'NY', 'NY', 'FL', 'FL', 'FL', 'FL', 0, 0]
