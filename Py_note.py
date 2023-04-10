@@ -390,11 +390,12 @@ torch.cat(, dim= ) # don't add dims
 #LISTlist   plus 
 
 list + list = extend.
-list+ ndarray = plus by elements
+list+ ndarray = plus by elements ### using  np.append( ndarray1, ndarray2) √
 [-6, -14,-15]+ np.array([1,2,3])  # array([ -5, -12, -12])
 [-6, -14,-15]+  [1,2,3] # [-6, -14, -15, 1, 2, 3]
 # delete 
 del a[2:4] 
+
 
 
 #
