@@ -1357,22 +1357,59 @@ plt.close()
 
 # grouped bar chart 
 
-def bar_group(ds,  bars_cols,index_col=None, xlabel='',ylabel='', 
-    plotname='Fig.Name',colors=0, alpha=1 , xtick_rotation=0, save_as_pdf=''):
+# 先进行分组边界。 
+def group( ds, bar_cols, index_col, stride =10000, _hist=None ):
+##  只能计算明细数据的 sum()的分组，不能计算聚合 平均数，或者加权聚合的情况。
+#     index_col='val'
+#     bar_cols=['cnt','adcnt','revenue']
+#     stride= 10000
+
+    hist = _hist if _hist else np.arange(0, max(ds[index_col]), step= stride ) 
+    new_ds={}
+    for i in range(len(hist)):
+    #     print(i,hist[i])
+        if i == len(hist)-1: # 最后一个bin
+            dx= ds[(ds[index_col]>= hist[i])]
+            new_ds[ max(max(ds[index_col]),hist[i])  if _hist else (hist[i]+stride) ]= dx[bar_cols].sum()
+        else:
+            dx= ds[(ds[index_col]>= hist[i])& (ds[index_col]< hist[i+1])]
+            new_ds[hist[i+1]]= dx[bar_cols].sum()
+
+    return pd.DataFrame(new_ds).T
+
+def bar_group(dataset,  bars_cols, index_col=None,
+              trans_to_percentage= False,
+              bar_text_format= None, # ':.2f' 
+              xlabel='',ylabel='', 
+                plotname='Fig.Name',colors=0, alpha=1 , xtick_rotation=0, save_as_pdf=''):
     '''
+    dataset should be like:  ['index', 'col1','col2','col3'...]
     plot a grouped bar chart
     '''
+    ds= dataset.copy()
+        
+    index = ds[index_col] if index_col else ds.index 
     N= len(ds) 
     grps= len(bars_cols)
-    index = ds[index_col] if index_col else ds.index 
     barWidth = 1/(grps+1)   # if group of n, then the barWidth = 1/(n+1)
+    label_appendix=''
+    if trans_to_percentage:
+        label_appendix= '(%)'
+        for c in bars_cols:
+            ds[c]= ds[c]*100/ds[c].sum()
     for i, col in enumerate(bars_cols):
         r= [x + barWidth*i for x in range(N)]
         bars= ds[col]
         if colors:
-            plt.bar(r, bars,width=barWidth, edgecolor='white', label=col, color=colors[i], alpha= alpha)
+            plt.bar(r, bars,width=barWidth, edgecolor='white', label=col+label_appendix, color=colors[i], alpha= alpha)
         else:
-            plt.bar(r, bars,width=barWidth, edgecolor='white', label=col, alpha= alpha) 
+            plt.bar(r, bars,width=barWidth, edgecolor='white', label=col+label_appendix, alpha= alpha) 
+        
+        if bar_text_format:  #柱子上的数字显示
+            for j, t in zip(r, bars):
+                plt.text(j, t, bar_text_format % t, ha='center',va='bottom', rotation= '60', fontsize= 7)
+   
+
     plt.xlabel(xlabel, fontsize=10)
     plt.ylabel(ylabel, fontsize=10)
     plt.yticks(fontsize=8)
@@ -1383,7 +1420,6 @@ def bar_group(ds,  bars_cols,index_col=None, xlabel='',ylabel='',
     if save_as_pdf:
         plt.savefig(save_as_pdf, format='pdf')
     plt.show()
-
 
 
 # error bar 
