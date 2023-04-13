@@ -508,7 +508,17 @@ result = prog.match(string)  # match from the beginning
 #search  from anywhere 
 
 # ************************************************************
+1\ match()和search()的区别： 
 Note however that in MULTILINE mode match() only matches at the beginning of the string, whereas using search() with a regular expression beginning with '^' will match at the beginning of each line.
+
+2\ 注意match()和findall()的区别，match是看给的text是不是匹配，只要有一处匹配就返回true，findall是在给的text中找出所有符合的字符串出来。 
+
+m = re.findall(r"(classic solitaire[0-9]?)", 'Classic Solitaire (CS,S3,纸牌3), Classic Solitaire1  Classic Solitaire2 ' 
+             ,flags= re.IGNORECASE
+             )
+
+print('true' if m else 'false')
+list(m) # ['Classic Solitaire', 'Classic Solitaire1', 'Classic Solitaire2']
 
 >>>
 >>> re.match('X', 'A\nB\nX', re.MULTILINE)  # No match
@@ -535,14 +545,7 @@ m = re.match(r"(\w+) [a-z]{2} (\w+)", "Isaac xx Newton, physicist")
 m.groups() #('Isaac', 'Newton')  only return groups.
 m.group(0) # 'Isaac xx Newton'
 
-# 注意match()和findall()的区别，match是看给的text是不是匹配，只要有一处匹配就返回true，findall是在给的text中找出所有符合的字符串出来。 
 
-m = re.findall(r"(classic solitaire[0-9]?)", 'Classic Solitaire (CS,S3,纸牌3), Classic Solitaire1  Classic Solitaire2 ' 
-             ,flags= re.IGNORECASE
-             )
-
-print('true' if m else 'false')
-list(m) # ['Classic Solitaire', 'Classic Solitaire1', 'Classic Solitaire2']
 # ************************************************************
 # set() 
 s1={1,2,3,4,'a','b','c'}
