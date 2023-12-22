@@ -1,4 +1,57 @@
 # #######################
+# Amendation : 
+# Shanghai 
+
+
+# #######################
+
+def to_number(n):
+    ''' Convert any number representation to a number
+    This covers float, decimal, hex, and octal numbers.
+    a= ["1",'2.0','2E2',20,0.0003,"23,456",'2e-1','abcbafdf','   -127.02   ',"US","GK"]
+    list(map(to_number, a))
+
+    no comma is allowed. 
+    '''
+
+    try:
+        return int(str(n), 0)
+    except:
+        try:
+            # Python 3 doesn't accept "010" as a valid octal.  You must use the
+            # '0o' prefix
+            return int('0o' + n, 0)
+        except:
+            try: 
+                return float(n)
+            except:
+                return n 
+
+
+a= ["1",'2.0','2E2',20,0.0003,"23,456",'2e-1','abcbafdf','   -127.02   ',"US","GK"]
+# b= list(map(to_number, a))
+# type(b[4])
+# b
+list(map(to_number, a))
+
+
+# 测试 regexp
+
+def re_findall( pattern,  object_list):
+    prog= re.compile(pattern, flags=re.IGNORECASE)
+    return object_list[([bool(prog.search(str(x)))  for x in object_list])]
+
+ 
+
+# re_findall(pattern=  r"(spider5)", object_list= df.app.unique())
+
+
+
+
+
+
+
+# #######################
 # Author: Kyle Gao 
 # Sept 2020
 # @Sheffield, UK 
