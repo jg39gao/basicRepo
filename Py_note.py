@@ -5,6 +5,145 @@
 
 # #######################
 
+
+
+
+def nanaverage(A,weights,axis=None):
+    '''只在非空里进行加权平均， 权重为weights， A和weights均为series类型'''
+    try: 
+        return np.nansum(A*weights,axis=axis)/((~np.isnan(A))*weights).sum(axis=axis)
+    except: return np.nan
+
+
+def md_sum( A, n, DATA, axis= None):
+    '''计算公式， A ，目标操作列，series类型;  DATA, dataframe source. '''
+    try: 
+        return np.nansum((~np.isnan( DATA[ DATA['d_diff']== n-1]['d_diff'])) * A , axis=axis) 
+    except: return np.nan
+
+def md_rr( A, Weight1,n, DATA, axis= None):
+    ''' 分母为安装量， A和 Weight1 均为series类型'''
+    try:
+        return np.nansum((~np.isnan( DATA[ DATA['d_diff']== n-1]['d_diff'])) * A , axis=axis)/ np.nansum(Weight1, axis= axis)
+    except: return np.nan
+
+def md_rc( A, Weight1,n, DATA, axis= None):
+    '''计算留存系数，分母为安装量， A和 Weight1 均为series类型'''
+    try: 
+        return np.nansum((~np.isnan( DATA[ DATA['d_diff']<= n-1]['d_diff'])) * A , axis=axis)/ np.nansum(Weight1, axis= axis)
+    except: return np.nan
+    
+def md_avg( A, Weight1,n, DATA, axis= None):
+    '''分子母需要匹配index， A和 Weight1 均为series类型'''
+    try:
+        return np.nansum((~np.isnan( DATA[ DATA['d_diff']== n-1]['d_diff'])) * A , axis=axis) \
+            / np.nansum((~np.isnan( DATA[ DATA['d_diff']== n-1]['d_diff'])) * Weight1, axis= axis)
+    except: return np.nan
+    
+# 以及可以添加更多的计算公式。
+
+# metric_trends
+ds_mt= ds.groupby([#'大类', 
+                          '#bundle_id','#OS','i_country_code'
+                        ,'install_date'
+                            ]
+          ).agg(
+                install=("ucnt1", "sum")
+                ,ret2= ('active_ucnt',  lambda x: md_sum( x, n= 2, DATA= ds) )
+                ,rr2 = ('active_ucnt',  lambda x: md_rr( x, ds.loc[x.index, 'ucnt1'],  2, ds))
+                ,dur2= ('duration', lambda x: md_avg(x, ds.loc[x.index,'active_ucnt'], 2, ds))
+                ,dur7= ('duration', lambda x: md_avg(x, ds.loc[x.index,'active_ucnt'], 7, ds))
+
+).reset_index()
+
+
+
+def weight_avg( _metric, _weight, _othercols, _DATA):
+    ''' _metric ,1 element LIST like, metric col
+        _weight, 1 element LIST like, weight col
+        _DATA, dataframe
+        '''
+    wmi = lambda i: nanaverage(i, weights=_DATA.loc[i.index, _weight[0]] )
+    result= _DATA.groupby( _othercols
+              ).agg( 
+                    days= (_weight[0],'count'),
+                    sum_install= (_weight[0], 'sum'),
+                    weighted_col=(_metric[0] ,wmi),
+                    col_order= ('temp_order','max'))
+    return result.reset_index()
+
+
+
+
+def mtric_dwm( __metrix, __col_w, __col_grp, __ds ,__obs_day, __col_date= ['install_date'], transpose= True):
+    '''
+        to transform  a metrix trends ( with date [__col_date] ) to  latest 7day- 4week - 3month to the __obs_day. 
+        Notice:  must use with weight_avg( _metric, _weight, _othercols, _DATA) together.
+        
+        __metrix, 1 element LIST like,  the metric to be operated.  eg: ['col1']
+        __col_w, 1 element LIST like,  weight column . eg: ['col2']
+        __col_grp, 1 element LIST like, cols to be group by .  eg:['col3','col4']
+        __ds ,  dataframe
+        __obs_day , datetime.datetime,  eg: __obs_day= datetime.datetime(2024,2,10) 
+        __col_date , 1 element(datetime.datetime) LIST like ,  eg: '2023-01-01' 
+        transpose, boolean, whether to tranpose the result dataset ,aka, 7day- 4week - 3month, row to columns.
+    '''
+    x= __metrix
+    cols= __col_grp + __col_date + __col_w
+    
+    __ds['odiff']= __obs_day - __ds[__col_date[0]]
+    # 近7天
+    tempDS = __ds[cols +x+ ['odiff']][(__ds['odiff']<'7d') & (__ds['odiff']>='0d')]
+    tempDS['temp_order']= tempDS.odiff.astype("timedelta64[D]").astype(int) # 用于计算排序列
+    tempDS['odiff']=tempDS[__col_date[0]].astype('string').apply(lambda i: i[-5:])
+    tempDS['tag']= tempDS['temp_order'].apply( lambda i: 'Day'+str(i+1))  # 转成列名
+
+
+    # result= pd.DataFame()
+
+    result= weight_avg( _metric= x, _weight=__col_w
+               ,_othercols= __col_grp +['odiff','tag']
+               , _DATA= tempDS )
+
+    # 近4周
+    tempDS = __ds[cols +x+ ['odiff']][(__ds['odiff']<'28d') & (__ds['odiff']>='0d')]
+    tempDS['temp_order']= tempDS.odiff.astype("timedelta64[D]").astype(int)
+    tempDS['odiff']=tempDS.odiff.astype("timedelta64[D]").astype(int).apply(lambda i: 'Week'+str(int(i/7)+1))
+    tempDS['tag']= tempDS['odiff']#.apply(lambda i: 'i'+i)
+
+    result= pd.concat([result,#4
+                        weight_avg( _metric= x, _weight=__col_w
+                                   ,_othercols= __col_grp  +['odiff','tag']
+                                   , _DATA= tempDS )
+                       ], ignore_index=True)
+
+    # 近3月
+    tempDS = __ds[cols +x+ ['odiff']][(__ds['odiff']<'90d') & (__ds['odiff']>='0d')]
+    tempDS['temp_order']= tempDS.odiff.astype("timedelta64[D]").astype(int)
+    tempDS['odiff']=tempDS.odiff.astype("timedelta64[D]").astype(int).apply(lambda i: 'month'+str(int(i/30)+1))
+    tempDS['tag']= tempDS['odiff']
+
+    result= pd.concat([result,#7
+                        weight_avg( _metric= x, _weight=__col_w 
+                                   ,_othercols= __col_grp  +['odiff','tag']
+                                   , _DATA= tempDS )
+
+                        ], ignore_index=True)
+
+
+    # result = 
+    if transpose:
+        result= result.pivot(index=__col_grp, columns='tag', values='weighted_col').reset_index() 
+        return result.sort_values(__col_grp)
+
+    else :
+        return result.sort_values(__col_grp+['col_order']
+                                 )
+
+
+
+
+
 def to_number(n):
     ''' Convert any number representation to a number
     This covers float, decimal, hex, and octal numbers.
