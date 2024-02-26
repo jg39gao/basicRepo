@@ -6,12 +6,36 @@
 # #######################
 
 
+list 去重
+
+def f7(seq):
+    '''Why assign seen.add to seen_add instead of just calling seen.add? 
+    Python is a dynamic language, and resolving seen.add each iteration is more costly than 
+    resolving a local variable. seen.add could have changed between iterations, 
+    and the runtime isn't smart enough to rule that out. To play it safe, it has to check the object each time.
+    
+    it's faster than f1 , faaaster than f2: 
+    
+    
+    f1 :  
+        pd.Series(seq).drop_duplicates().tolist()
+    
+    f2 : 
+        reduce(lambda x,y:  ([x]+[y] if x!=y else x) if (not isinstance(x,list))  else ( x if Counter(x).get(y) else x+[y]), list_t)
+    '''
+    seen = set()
+    seen_add = seen.add
+    return [x for x in seq if not (x in seen or seen_add(x))]
+
+
+
+
 
 
 def nanaverage(A,weights,axis=None):
     '''只在非空里进行加权平均， 权重为weights， A和weights均为series类型'''
     try: 
-        return np.nansum(A*weights,axis=axis)/((~np.isnan(A))*weights).sum(axis=axis)
+        return np.nansum((~(np.isnan(A) | np.isinf(A)))*A*weights,axis=axis)/((~(np.isnan(A) | np.isinf(A)))*weights).sum(axis=axis)
     except: return np.nan
 
 
