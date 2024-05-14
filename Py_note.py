@@ -1384,6 +1384,8 @@ Slice 		rows					df[5:10]		DataFrame
 Select 		rows by boolean vector	df[bool_vec]	DataFrame
 ------------------------------------------------------------------------
 
+df.loc[idx[:,:,:,'xxx1','x2'],['col1','col2']] ,     for multi_index dataframes. 
+
 # DataFrame's  loc[] can new new element directly whilst iloc[] cannot.
 # loc[] gets rows (or columns) with particular labels from the index.
 # iloc[] gets rows (or columns) at particular positions in the index (so it only takes integers).
