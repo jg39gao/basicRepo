@@ -35,7 +35,10 @@ sudo yum install git
 git clone git@github.com:jg39gao/VisualSpeakerIdentification.git
 '''after this step, the repository has been cloned into your new directory '''
 
-
+'''当出现如下错误时,
+ 『致命错误：目标路径 'pathxxx' 已经存在，并且不是一个空目录。』 
+需要执行一下初始化即可：'''
+git init 
 
 ****** git MainCourse ******************************************************
 
