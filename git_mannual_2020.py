@@ -44,7 +44,15 @@ git init
 '''此外，
 git status 查看状态
 git branch 列出当前分支
-git diff  检查不一样。'''
+git diff  检查不一样。
+
+
+对于只读权限，但是本地不小心做了一些改动，想要pull 远程库强制覆盖本地改动。 只需执行下面两步。、
+
+git reset --hard HEAD
+git pull 
+
+'''
 
 ****** git MainCourse ******************************************************
 
