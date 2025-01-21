@@ -40,6 +40,12 @@ git clone git@github.com:jg39gao/VisualSpeakerIdentification.git
 需要执行一下初始化即可：'''
 git init 
 
+
+'''此外，
+git status 查看状态
+git branch 列出当前分支
+git diff  检查不一样。'''
+
 ****** git MainCourse ******************************************************
 
 # Pull from the remote repo. (Technically fetch + merge remote changes first.)
